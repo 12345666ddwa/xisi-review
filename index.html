@@ -173,12 +173,129 @@
     font-size: 13px; border-top: 1px solid var(--border); margin-top: 20px;
   }
 
-  @media (max-width: 600px) {
-    .topnav { gap: 2px; }
-    .topnav a { font-size: 12px; padding: 5px 8px; }
-    .topnav .brand { font-size: 13px; margin-right: 6px; }
-    .header h1 { font-size: 18px; }
-    .exam-grid { grid-template-columns: repeat(2, 1fr); }
+  /* AI Assistant */
+  .ai-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 200;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    color: #fff; border: none; cursor: pointer;
+    font-size: 28px; box-shadow: 0 4px 16px rgba(192,57,43,0.3);
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+  }
+  .ai-btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(192,57,43,0.4); }
+  .ai-btn .badge {
+    position: absolute; top: -4px; right: -4px;
+    background: #f39c12; color: #fff; font-size: 11px;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+
+  .ai-panel {
+    position: fixed; bottom: 96px; right: 24px; z-index: 199;
+    width: 380px; max-height: 580px; background: #fff;
+    border-radius: 18px; box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    display: none; flex-direction: column; overflow: hidden;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .ai-panel.open { display: flex; }
+
+  .ai-header {
+    background: linear-gradient(135deg, #c0392b, #96281b);
+    color: #fff; padding: 16px 18px; display: flex;
+    align-items: center; gap: 10px;
+  }
+  .ai-header .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .ai-header .info { flex: 1; }
+  .ai-header .info h4 { font-size: 14px; margin-bottom: 2px; }
+  .ai-header .info p { font-size: 11px; opacity: 0.8; }
+  .ai-header .close-btn {
+    background: none; border: none; color: rgba(255,255,255,0.7);
+    font-size: 22px; cursor: pointer; padding: 4px;
+  }
+  .ai-header .close-btn:hover { color: #fff; }
+
+  .ai-messages {
+    flex: 1; overflow-y: auto; padding: 14px 16px;
+    background: #faf7f0; display: flex; flex-direction: column; gap: 10px;
+    min-height: 280px; max-height: 360px;
+  }
+  .ai-msg { display: flex; gap: 8px; max-width: 90%; }
+  .ai-msg.bot { align-self: flex-start; }
+  .ai-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .ai-msg .bubble {
+    padding: 10px 14px; border-radius: 14px;
+    font-size: 13px; line-height: 1.7;
+    word-wrap: break-word; white-space: pre-wrap;
+  }
+  .ai-msg.bot .bubble {
+    background: #fff; color: #2c3e50;
+    border-top-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .ai-msg.user .bubble {
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    color: #fff; border-top-right-radius: 4px;
+  }
+  .ai-msg .avatar-sm {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .ai-msg.bot .avatar-sm { background: #f0e8de; }
+  .ai-msg.user .avatar-sm { background: #e8d5d0; }
+
+  .ai-quick-reply {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 10px 16px 4px; background: #faf7f0;
+  }
+  .ai-quick-reply button {
+    background: #fff; border: 1px solid #e8e0d4;
+    border-radius: 16px; padding: 5px 12px; font-size: 12px;
+    cursor: pointer; color: #2c3e50; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .ai-quick-reply button:hover {
+    background: #f0e8de; border-color: #c0392b; color: #c0392b;
+  }
+
+  .ai-input-area {
+    display: flex; padding: 10px 12px 14px;
+    background: #faf7f0; border-top: 1px solid #e8e0d4;
+    gap: 8px;
+  }
+  .ai-input-area input {
+    flex: 1; padding: 10px 14px; border: 1px solid #ddd;
+    border-radius: 20px; font-size: 13px; outline: none;
+    font-family: inherit; background: #fff;
+  }
+  .ai-input-area input:focus { border-color: #c0392b; }
+  .ai-input-area button.send {
+    background: #c0392b; color: #fff; border: none;
+    border-radius: 50%; width: 40px; height: 40px;
+    cursor: pointer; font-size: 16px; flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .ai-input-area button.send:hover { background: #e74c3c; }
+
+  .typing-dots { display: flex; gap: 4px; padding: 6px 0; }
+  .typing-dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #c0392b; animation: typing 1.4s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%,60%,100%{opacity:0.3;transform:scale(0.8)} 30%{opacity:1;transform:scale(1)} }
+
+  @media (max-width: 480px) {
+    .ai-panel { width: calc(100vw - 32px); right: 16px; bottom: 88px; }
+    .ai-btn { width: 52px; height: 52px; font-size: 24px; right: 16px; bottom: 16px; }
   }
 </style>
 </head>
@@ -863,6 +980,324 @@ document.querySelectorAll('.topnav a').forEach(link => {
     }
   });
 });
+</script>
+
+<!-- AI 助教按钮 -->
+<button class="ai-btn" id="aiToggleBtn" onclick="toggleAI()">
+  🤖
+  <span class="badge">AI</span>
+</button>
+
+<!-- AI 助教面板 -->
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-header">
+    <div class="avatar">🤖</div>
+    <div class="info">
+      <h4>AI 助教 · 小思</h4>
+      <p>在线 · 基于课堂录音整理</p>
+    </div>
+    <button class="close-btn" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="aiMessages">
+    <div class="ai-msg bot">
+      <div class="avatar-sm">🤖</div>
+      <div class="bubble">👋 同学你好！我是 AI 助教小思，根据老师课堂录音整理了复习重点，可以帮你解答关于考试的问题！<br><br>试试问我：<br>• "中国式现代化有哪些特征？"<br>• "四个自信是什么？"<br>• "六个必须坚持"<br>• "新发展理念有哪些"<br>• "考试题型"</div>
+    </div>
+  </div>
+  <div class="ai-quick-reply" id="aiQuickReply"></div>
+  <div class="ai-input-area">
+    <input type="text" id="aiInput" placeholder="输入你的问题..." onkeydown="if(event.key==='Enter')askAI()">
+    <button class="send" onclick="askAI()">➤</button>
+  </div>
+</div>
+
+<script>
+// ========== AI 助教知识库 ==========
+const KNOWLEDGE = [
+  // --- 导论 ---
+  {
+    keywords: ["两个结合", "2个结合"],
+    answer: "⭐ 两个结合（老师重点画！）\n\n① 第一个结合：把马克思主义基本原理同中国具体实际相结合（毛泽东提出）\n② 第二个结合：把马克思主义基本原理同中华优秀传统文化相结合（习近平提出）\n\n📖 导论 p4 · 要记住分别是谁提出来的"
+  },
+  {
+    keywords: ["三大时代课题", "3大时代课题", "时代课题"],
+    answer: "⭐ 三大时代课题（高频考点，考过很多次）\n\n① 新时代坚持和发展什么样的中国特色社会主义、怎样坚持和发展中国特色社会主义\n② 建设什么样的社会主义现代化强国、怎样建设社会主义现代化强国\n③ 建设什么样的长期执政的马克思主义政党、怎样建设长期执政的马克思主义政党\n\n📖 导论 p6 · 牢记简答题"
+  },
+  {
+    keywords: ["十个明确", "10个明确", "十四个坚持", "14个坚持", "十三个方面成就", "13个方面成就", "主要内容"],
+    answer: "习近平新时代中国特色社会主义思想主要内容 = 十个明确 + 十四个坚持 + 十三个方面成就\n\n⚠️ 注意：不包括"六个必须坚持"（学习通易错题）\n\n📖 导论 p6-p7\n• 十个明确 → 主体内容\n• 十四个坚持 → 基本方略"
+  },
+  {
+    keywords: ["六个必须坚持", "6个必须坚持"],
+    answer: "⭐ 六个必须坚持\n\n① 必须坚持人民至上\n② 必须坚持自信自立\n③ 必须坚持守正创新\n④ 必须坚持问题导向\n⑤ 必须坚持系统观念\n⑥ 必须坚持胸怀天下\n\n📖 导论 p8 · 考选择题，哪个体现了什么要能选出来"
+  },
+  {
+    keywords: ["历史地位", "习近平思想历史地位"],
+    answer: "⭐ 习近平思想的历史地位（三个方面）\n\n① 是当代中国马克思主义、二十一世纪马克思主义\n② 是中华文化和中国精神的时代精华\n③ 实现了马克思主义中国化时代化新的飞跃\n\n📖 导论 p9 · 牢记简答题"
+  },
+  {
+    keywords: ["写入党章", "载入宪法", "确立为指导思想"],
+    answer: "⭐ 时间点（常考选择题）\n\n① 什么时候把习近平思想确立为党的指导思想并写入党章？\n② 什么时候把它载入宪法？\n\n📖 导论 p9 · 要牢记"
+  },
+  // --- 第一章 ---
+  {
+    keywords: ["四个自信", "4个自信"],
+    answer: "⭐ 四个自信\n\n• 道路自信 → 实现途径\n• 理论自信 → 行动指南\n• 制度自信 → 根本保障\n• 文化自信 → 精神力量\n\n📖 p20 · 简答题\n其中文化自信是更基础、更广泛、更深厚的自信（p22 选择题）"
+  },
+  {
+    keywords: ["社会主要矛盾", "主要矛盾变了"],
+    answer: "⭐ 为什么说社会主要矛盾变了？（三个原因）\n\n最主要原因（第一个）：社会主要矛盾的变化是习近平新时代中国特色社会主义思想的基本依据\n\n📖 p23-24\n\n原来表述：人民日益增长的物质文化需要同落后的社会生产之间的矛盾\n现在表述：人民日益增长的美好生活需要同不平衡不充分的发展之间的矛盾\n\n⚠️ p26 重要：社会主要矛盾变了，但我国仍处于社会主义初级阶段的基本国情没有变"
+  },
+  {
+    keywords: ["中国共产党为什么能", "马克思主义行"],
+    answer: "⭐ 中国共产党为什么能，中国特色社会主义为什么好，归根到底是马克思主义行\n\n📖 p29 · 常考点"
+  },
+  {
+    keywords: ["基本路线", "一个中心两个基本点"],
+    answer: "党的基本路线 = 一个中心，两个基本点\n基本方略 = 十四个坚持\n\n📖 p30"
+  },
+  {
+    keywords: ["总体布局", "战略布局", "五位一体", "四个全面"],
+    answer: "总体布局（五位一体）：经济建设、政治建设、文化建设、社会建设、生态文明建设\n战略布局（四个全面）：全面建设社会主义现代化国家、全面深化改革、全面依法治国、全面从严治党\n\n📖 p31"
+  },
+  // --- 第二章 ---
+  {
+    keywords: ["中国梦"],
+    answer: "⭐ 中国梦\n\n• 第一次提出：习近平在什么时候、在哪儿第一次提出？（p36 选择题）\n• 本质（三个方面）：国家富强、民族振兴、人民幸福（p37 简答题！）\n• 中共百年奋斗归结起来就是一个主题（p36）\n\n📖 p36-37"
+  },
+  {
+    keywords: ["中国式现代化", "现代化特征"],
+    answer: "⭐⭐ 中国式现代化的特征（老师强调：最重要的考点！）\n\n老师原话："这个可以说是最重要的一个特征"\n选择题、简答题最喜欢考\n\n📖 p44-46\n\n还有中国式现代化的本质要求（p47 牢记）\n中国共产党的领导是中国式现代化最本质的特征和最大优势（p55-56）"
+  },
+  {
+    keywords: ["两步走"],
+    answer: "建成社会主义现代化强国战略安排 = 两步走\n\n📖 p40 · 简答题"
+  },
+  {
+    keywords: ["最本质的特征", "最大优势"],
+    answer: "中国共产党的领导是中国式现代化最本质的特征和最大优势\n\n📖 p55-56 · 选择题"
+  },
+  // --- 第三章 ---
+  {
+    keywords: ["党的领导制度", "六大制度"],
+    answer: "⭐ 党的领导制度包括哪六大制度？\n\n📖 p69\n• 党的领导制度是具有统领地位的制度\n• 六大制度中哪个是根本制度？哪个是价值追求？哪个是最高原则？考选择\n\n还有"两个确立"（p68）"
+  },
+  {
+    keywords: ["最高政治领导力量"],
+    answer: "为什么说中国共产党是最高政治领导力量？牢记\n\n📖 p63-64 · 简答题"
+  },
+  // --- 第四章 ---
+  {
+    keywords: ["人民性", "群众路线"],
+    answer: "• 人民性是马克思主义的本质属性和鲜明品格（p74）\n• 群众路线是生命线和根本工作路线，是传家宝（p74）\n• 调查研究是获得真知灼见的源头活水（p85）\n• 四大原则：面对中国之问、世界之问、人民之问、时代之问需要把握好的四大原则（p88 · 简答题）"
+  },
+  // --- 第五章 ---
+  {
+    keywords: ["改革开放", "关键一招"],
+    answer: "• 改革开放是关键一招（p91）\n• 2013年十八届三中全会 → 全面深化改革决定（p93）\n• 2014年十八届四中全会 → 全面依法治国决定（p93）\n• 坚持全面深化改革的正确方向（p96-97 · 答题很重要）\n• 全面深化改革的总目标（p98）\n• 全面深化改革要坚持的正确方法论（p102-103）"
+  },
+  {
+    keywords: ["十八届三中全会", "十八届四中全会"],
+    answer: "⭐ 两个重要会议（时间要牢记！）\n\n• 2013年十八届三中全会 → 通过《全面深化改革若干重大问题的决定》\n• 2014年十八届四中全会 → 通过《全面推进依法治国若干重大问题的决定》\n\n📖 p93"
+  },
+  // --- 第六章 ---
+  {
+    keywords: ["新发展理念", "创新协调绿色开放共享"],
+    answer: "⭐ 新发展理念（常考选择！）\n\n• 创新 → 第一动力（解决动力问题）\n• 协调 → 内在要求（解决不平衡问题）\n• 绿色 → 必要条件\n• 开放 → 必由之路\n• 共享 → 本质要求\n\n📖 p115"
+  },
+  {
+    keywords: ["高质量发展"],
+    answer: "高质量发展：\n• 什么是高质量发展？（p117 从哪几个方面讲）\n• 高质量发展的重大意义（p117）\n• 社会主义基本经济制度的内涵（p121）\n• 构建高水平社会主义市场经济体制的关键（p124 · 很重要！市场在资源配置中起决定性作用）"
+  },
+  {
+    keywords: ["新发展格局"],
+    answer: "新发展格局 = 以国内大循环为主体、国内国际双循环相互促进\n\n• 构建新发展格局是把握未来发展主动权的先手棋（p126），不是被迫之举，也不是权宜之计\n• 不是封闭的国内单循环（p127）\n• 不是各地都搞自我小循环（p127）\n• 三大基本要求（p127-128 · 简答）\n• 如何大力构建新发展格局四点（p128-129）"
+  },
+  {
+    keywords: ["乡村振兴", "五大振兴"],
+    answer: "⭐ 乡村振兴（考选择，要能选出来）\n\n• 总目标、总方针、总要求\n• 制度保障\n• 五大振兴分别是什么？\n\n📖 p130"
+  },
+  // --- 第七章 ---
+  {
+    keywords: ["教育科技人才", "教育科技"],
+    answer: "教育、科技、人才（p135 · 选择题）\n• 哪个是根本？哪个是关键？哪个是基础？\n• 立德树人是根本任务（p142）\n• 教育强国的根本目的 = 培养社会主义建设者和接班人（p142）\n• 为什么要实现高水平科技自立自强？（p147 · 简答）"
+  },
+  // --- 第八章 ---
+  {
+    keywords: ["根本政治制度", "基本政治制度"],
+    answer: "根本政治制度：人民代表大会制度\n基本政治制度：\n① 中国共产党领导的多党合作和政治协商制度\n② 民族区域自治制度\n③ 基层群众自治制度\n\n📖 p160 · 牢记！"
+  },
+  {
+    keywords: ["全过程人民民主", "全过程民主"],
+    answer: "习近平在什么时间、什么地点第一次提出"人民民主是一种全过程的民主"？（p164 选择题）\n\n如何走中国特色社会主义政治发展道路？（p163 · 三点，简答）"
+  },
+  // --- 第九章 ---
+  {
+    keywords: ["全面依法治国", "法治体系", "依法治国"],
+    answer: "• 中国特色社会主义法治道路核心要义（p185 · 简答）\n• 全面依法治国的原则和重大关系（p186-188 · 常考简答）\n• 总抓手 = 建设中国特色社会主义法治体系（p189）\n• 中国特色社会主义法治体系包括五个方面（p192-194 · 简答）\n• 法治中国建设的宏伟蓝图（p196-197）"
+  },
+  // --- 第十章 ---
+  {
+    keywords: ["社会主义核心价值观", "核心价值观", "24个字", "24字"],
+    answer: "⭐ 社会主义核心价值观24个字\n\n国家层面：富强、民主、文明、和谐\n社会层面：自由、平等、公正、法治\n公民层面：爱国、敬业、诚信、友善\n\n📖 p213 · 简答题"
+  },
+  {
+    keywords: ["伟大建党精神"],
+    answer: "伟大建党精神（p214-215 · 选择题）"
+  },
+  // --- 第十一章 ---
+  {
+    keywords: ["民生福祉", "增进民生福祉"],
+    answer: "为什么要增进民生福祉？（三点）\n\n📖 p225 · 简答\n\n共同富裕：理念是先导，制度是保障，方式方法是重要内容（p237）"
+  },
+  {
+    keywords: ["共同富裕"],
+    answer: "共同富裕：理念是先导，制度是保障，方式方法是重要内容\n\n📖 p237"
+  },
+  // --- 考试信息 ---
+  {
+    keywords: ["考试", "题型", "分值", "多少分"],
+    answer: "📋 考试题型与分值\n\n• 单选题：25题 × 1分 = 25分\n• 多选题/判断题：5题 × 3分 = 15分\n• 简答题：4题 × 5分 = 20分\n• 材料分析题：1题 × 50分（含做问题30分）\n\n⚠️ 老师提醒：前面共60分，拿不到30分+做问题不努力=可能不及格！"
+  },
+  {
+    keywords: ["复习策略", "怎么复习", "学习方法", "学习通"],
+    answer: "💡 老师原话复习策略：\n\n"先把教材当中的要点记好了，再来看学习通上的题。\n不要你连教材当中的知识点都没有掌握，你就去靠学习通上的题来复习考试，这个方法是不科学的。"\n\n学习通上的题只是练习用的，不做硬性要求。"
+  }
+];
+
+// Quick reply buttons
+const QUICK_REPLIES = [
+  "中国式现代化有哪些特征？",
+  "四个自信是什么？",
+  "六个必须坚持",
+  "新发展理念有哪些",
+  "考试题型",
+  "社会主要矛盾"
+];
+
+// ========== AI 助教逻辑 ==========
+let isThinking = false;
+
+function toggleAI() {
+  const panel = document.getElementById('aiPanel');
+  const btn = document.getElementById('aiToggleBtn');
+  panel.classList.toggle('open');
+  btn.style.display = panel.classList.contains('open') ? 'none' : 'flex';
+  if (panel.classList.contains('open')) {
+    document.getElementById('aiInput').focus();
+    showQuickReplies();
+  }
+}
+
+function showQuickReplies() {
+  const container = document.getElementById('aiQuickReply');
+  container.innerHTML = '';
+  QUICK_REPLIES.forEach(q => {
+    const btn = document.createElement('button');
+    btn.textContent = q;
+    btn.onclick = () => { document.getElementById('aiInput').value = q; askAI(); };
+    container.appendChild(btn);
+  });
+}
+
+function addMessage(text, isUser) {
+  const container = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${isUser ? 'user' : 'bot'}`;
+  div.innerHTML = `<div class="avatar-sm">${isUser ? '👤' : '🤖'}</div><div class="bubble">${text}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const container = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg bot';
+  div.id = 'typingIndicator';
+  div.innerHTML = `<div class="avatar-sm">🤖</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function findAnswer(input) {
+  const q = input.toLowerCase().replace(/[，。？、\s]/g, '');
+  
+  // Direct keyword matching with scoring
+  let bestMatch = null;
+  let bestScore = 0;
+  
+  for (const item of KNOWLEDGE) {
+    for (const kw of item.keywords) {
+      const kwLower = kw.toLowerCase().replace(/[，。？、\s]/g, '');
+      if (q.includes(kwLower)) {
+        // Longer keyword match = better score
+        const score = kwLower.length;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = item;
+        }
+      }
+    }
+  }
+  
+  if (bestMatch) return bestMatch.answer;
+  
+  // Fuzzy fallback: check if any keyword is partially contained
+  for (const item of KNOWLEDGE) {
+    for (const kw of item.keywords) {
+      const kwLower = kw.toLowerCase().replace(/[，。？、\s]/g, '');
+      // Check if query contains 70%+ of keyword characters
+      let matchCount = 0;
+      for (const ch of kwLower) {
+        if (q.includes(ch)) matchCount++;
+      }
+      if (matchCount >= kwLower.length * 0.7) {
+        return item.answer;
+      }
+    }
+  }
+  
+  return null;
+}
+
+function askAI() {
+  if (isThinking) return;
+  const input = document.getElementById('aiInput');
+  const q = input.value.trim();
+  if (!q) return;
+  
+  addMessage(escapeHtml(q), true);
+  input.value = '';
+  isThinking = true;
+  showTyping();
+  
+  // Simulate thinking delay (200-600ms)
+  setTimeout(() => {
+    removeTyping();
+    
+    let answer = findAnswer(q);
+    if (answer) {
+      addMessage(answer.replace(/\n/g, '<br>'), false);
+    } else {
+      addMessage('🤔 这个问题我暂时还不太确定，建议你翻翻教材对应章节的内容。目前我的知识基于老师课堂录音整理的考试重点，可以试试问上面的快捷问题哦！', false);
+    }
+    
+    isThinking = false;
+    showQuickReplies();
+    document.getElementById('aiInput').focus();
+  }, 300 + Math.random() * 300);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
 </script>
 
 </body>
