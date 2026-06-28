@@ -302,6 +302,16 @@
     outline: none; border-color: #c0392b !important; box-shadow: 0 0 0 2px rgba(192,57,43,0.1);
   }
 
+  /* 选中文字提示 */
+  .ai-sel-tip {
+    position: fixed; z-index: 9998; display: none;
+    background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff;
+    padding: 6px 14px; border-radius: 18px; font-size: 13px; font-weight: 600;
+    cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    user-select: none; pointer-events: auto;
+  }
+  .ai-sel-tip:hover { background: #e74c3c; transform: scale(1.05); }
+
   @media (max-width: 480px) {
     .ai-panel { width: calc(100vw - 32px); right: 16px; bottom: 88px; }
     .ai-btn { width: 52px; height: 52px; font-size: 24px; right: 16px; bottom: 16px; }
@@ -998,6 +1008,9 @@ console.log("✋ 小思助教已加载");
   <span class="badge">AI</span>
 </button>
 
+<!-- 选中文字提示 -->
+<div class="ai-sel-tip" id="aiSelTip">🤖 问AI助教</div>
+
 <!-- AI 助教面板 -->
 <div class="ai-panel" id="aiPanel">
   <div class="ai-header">
@@ -1315,6 +1328,50 @@ async function askAI() {
 
 // Initialize
 updateModeBadge();
+
+// 选中文字弹出提示
+document.addEventListener('mouseup', function(e) {
+  var tip = document.getElementById('aiSelTip');
+  // Click inside panel or on tip itself → ignore
+  if (e.target.closest('.ai-panel') || e.target.closest('.ai-btn') || e.target.closest('.ai-sel-tip')) {
+    tip.style.display = 'none';
+    return;
+  }
+  setTimeout(function() {
+    var sel = window.getSelection().toString().trim();
+    if (sel.length > 2 && sel.length < 500) {
+      try {
+        var range = window.getSelection().getRangeAt(0);
+        var rect = range.getBoundingClientRect();
+        tip.style.left = Math.min(rect.left + rect.width / 2 - 50, window.innerWidth - 130) + 'px';
+        tip.style.top = (rect.top - 40) + 'px';
+        tip.style.display = 'block';
+        tip.dataset.selection = sel;
+      } catch(e) { tip.style.display = 'none'; }
+    } else {
+      tip.style.display = 'none';
+    }
+  }, 10);
+});
+
+// 点击提示按钮 → 自动填入选中文字并打开AI
+document.getElementById('aiSelTip').onclick = function() {
+  var text = this.dataset.selection || window.getSelection().toString().trim();
+  if (text) {
+    document.getElementById('aiInput').value = text;
+    this.style.display = 'none';
+    toggleAI();
+    // Delay to let panel open first
+    setTimeout(function() { askAI(); }, 400);
+  }
+};
+
+// 点击页面其他区域隐藏提示
+document.addEventListener('mousedown', function(e) {
+  if (!e.target.closest('.ai-sel-tip')) {
+    document.getElementById('aiSelTip').style.display = 'none';
+  }
+});
 </script>
 
 </html>
