@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⭐ 习思想 · 川农押题模拟卷</title>
+<style>
+  :root {
+    --primary: #c0392b; --primary-light: #e74c3c; --accent: #2980b9;
+    --bg: #faf7f0; --card: #ffffff; --text: #2c3e50; --text-light: #7f8c8d;
+    --border: #e8e0d4; --correct: #27ae60; --wrong: #e74c3c; --purple: #8e44ad;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Microsoft YaHei", "PingFang SC", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.8;
+  }
+  .header {
+    background: linear-gradient(135deg, #c0392b, #96281b);
+    color: #fff; padding: 28px 20px 20px; text-align: center;
+  }
+  .header h1 { font-size: 22px; margin-bottom: 4px; }
+  .header .meta { font-size: 13px; opacity: 0.85; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .container { max-width: 860px; margin: 0 auto; padding: 16px; }
+
+  /* Score bar */
+  .score-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff; padding: 10px 20px; display: flex;
+    justify-content: space-between; align-items: center;
+    font-size: 14px; border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .score-bar .total { font-size: 18px; font-weight: 700; }
+  .score-bar .total span { color: #f1c40f; }
+  .submit-all {
+    background: #f1c40f; color: #2c3e50; border: none;
+    padding: 6px 18px; border-radius: 20px; font-size: 13px;
+    font-weight: 700; cursor: pointer;
+  }
+  .submit-all:hover { background: #f39c12; }
+
+  /* Exam info card */
+  .exam-info {
+    background: linear-gradient(135deg, #fff, #fdf2f2);
+    border: 2px solid var(--primary-light); border-radius: 12px;
+    padding: 16px; margin-bottom: 16px;
+  }
+  .exam-info h2 { color: var(--primary); font-size: 16px; margin-bottom: 8px; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+  .info-item { background: #fff; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid var(--border); }
+  .info-item .num { font-size: 24px; font-weight: 700; color: var(--primary); }
+  .info-item .label { font-size: 12px; color: var(--text-light); }
+
+  /* Section */
+  .section-title {
+    font-size: 17px; font-weight: 700; color: var(--primary);
+    padding: 14px 0 8px; border-bottom: 3px solid var(--primary);
+    margin: 20px 0 12px;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card); border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .q-header {
+    padding: 12px 16px; cursor: pointer; user-select: none;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 8px;
+  }
+  .q-header:hover { background: #fdf2f2; }
+  .q-header .q-num { font-weight: 700; color: var(--primary); flex-shrink: 0; }
+  .q-header .q-text { flex: 1; font-size: 14px; }
+  .q-header .q-status { font-size: 12px; flex-shrink: 0; }
+  .q-body { display: none; padding: 0 16px 12px; }
+  .q-card.open .q-body { display: block; }
+  .q-card.open .q-header { background: #fdf2f2; }
+
+  .options { padding: 4px 0; }
+  .option {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    margin: 4px 0; border-radius: 6px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .option:hover { background: #f0e8de; }
+  .option.selected { background: #fef9e7; border: 1px solid #f39c12; }
+  .option input[type="radio"], .option input[type="checkbox"] { accent-color: var(--primary); }
+
+  .q-answer-box {
+    background: #eaf7ee; border-left: 3px solid var(--correct);
+    padding: 10px 14px; margin-top: 8px; border-radius: 4px;
+    display: none; font-size: 13px;
+  }
+  .q-answer-box.show { display: block; }
+  .q-answer-box .label-correct { color: var(--correct); font-weight: 700; }
+  .q-answer-box .label-wrong { color: var(--wrong); font-weight: 700; }
+  .q-reveal {
+    background: var(--purple); color: #fff; border: none;
+    padding: 5px 14px; border-radius: 16px; font-size: 12px;
+    cursor: pointer; margin-top: 6px;
+  }
+  .q-reveal:hover { background: #6c3483; }
+
+  /* 判断标记 */
+  .judge-btn { margin: 4px 6px 4px 0; }
+
+  /* 简答题 & 材料题 */
+  .essay-area { width: 100%; min-height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; font-family: inherit; margin: 8px 0; }
+  .essay-area:focus { border-color: var(--primary); outline: none; }
+
+  /* Result modal */
+  .result-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center;
+  }
+  .result-overlay.show { display: flex; }
+  .result-box {
+    background: #fff; border-radius: 16px; padding: 30px;
+    max-width: 440px; width: 90%; text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  }
+  .result-box .big-score { font-size: 56px; font-weight: 700; color: var(--primary); }
+  .result-box .grade { font-size: 18px; margin: 8px 0; }
+  .result-box .detail { font-size: 14px; color: var(--text-light); line-height: 2; }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 18px; }
+    .q-header { flex-wrap: wrap; }
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⭐ 习近平新时代中国特色社会主义思想</h1>
+  <div class="meta">
+    <span>🏫 四川农业大学 · 经济学院 · 押题模拟卷</span>
+    <span>📅 2025-2026 第2学期</span>
+    <span>👤 Hermes × 高兴 根据课堂重点+时政编制</span>
+  </div>
+</div>
+
+<div class="score-bar" id="scoreBar">
+  <div>📊 已答 <span id="answeredCount">0</span>/<span id="totalCount">30</span> 题</div>
+  <div class="total">预估得分：<span id="liveScore">0</span> 分</div>
+  <button class="submit-all" onclick="submitAll()">✅ 交卷评分</button>
+</div>
+
+<div class="container">
+
+<div class="exam-info">
+  <h2>📋 考试说明</h2>
+  <div class="info-grid">
+    <div class="info-item"><div class="num">25</div><div class="label">单选题 · 每题1分</div></div>
+    <div class="info-item"><div class="num">5</div><div class="label">判断题 · 每题3分</div></div>
+    <div class="info-item"><div class="num">4</div><div class="label">简答题 · 每题5分</div></div>
+    <div class="info-item"><div class="num">50</div><div class="label">材料分析题 · 含做问题</div></div>
+  </div>
+  <div style="margin-top:10px;font-size:13px;color:var(--text-light);">
+    💡 点击题目可折叠/展开 · 做完点击顶部"交卷评分" · 时政题标注<span style="color:#8e44ad;font-weight:700;">〔时政〕</span>
+  </div>
+</div>
+
+<div class="section-title">一、单选题（每题1分，共25分）</div>
+
+<script>
+// ========== 题库 ==========
+const QUESTIONS = [
+  // --- 单选题（25题） ---
+  {
+    id: 1, type: 'radio', section: 'single', score: 1,
+    question: '"第二个结合"是指把马克思主义基本原理同什么相结合？',
+    options: ['A. 中国具体实际', 'B. 中华优秀传统文化', 'C. 中国革命实践', 'D. 中国改革开放经验'],
+    answer: 1, // B
+    analysis: '第二个结合（习近平提出）：马克思主义基本原理同中华优秀传统文化相结合。第一个结合（毛泽东提出）：同中国具体实际相结合。'
+  },
+  {
+    id: 2, type: 'radio', section: 'single', score: 1,
+    question: '在"六个必须坚持"中，强调要聚焦突出矛盾和问题的是哪一条？',
+    options: ['A. 必须坚持人民至上', 'B. 必须坚持守正创新', 'C. 必须坚持问题导向', 'D. 必须坚持系统观念'],
+    answer: 2,
+    analysis: '问题导向对应"聚焦突出矛盾和问题"。六个必须坚持：人民至上（立场）、自信自立（特质）、守正创新（态度）、问题导向（方法）、系统观念（思维）、胸怀天下（视野）。'
+  },
+  {
+    id: 3, type: 'radio', section: 'single', score: 1,
+    question: '在"四个自信"中，被视为"更基础、更广泛、更深厚的自信"的是？',
+    options: ['A. 道路自信', 'B. 理论自信', 'C. 制度自信', 'D. 文化自信'],
+    answer: 3,
+    analysis: '文化自信是更基础、更广泛、更深厚的自信。注意各自信的定位：道路→实现途径、理论→行动指南、制度→根本保障、文化→精神力量。'
+  },
+  {
+    id: 4, type: 'radio', section: 'single', score: 1,
+    question: '新时代我国社会主要矛盾是什么？',
+    options: ['A. 人民日益增长的物质文化需要同落后的社会生产之间的矛盾', 'B. 人民日益增长的美好生活需要同不平衡不充分的发展之间的矛盾', 'C. 生产关系和生产力之间的矛盾', 'D. 上层建筑和经济基础之间的矛盾'],
+    answer: 1,
+    analysis: '新时代社会主要矛盾：人民日益增长的美好生活需要同不平衡不充分的发展之间的矛盾。A是原来的表述（十九大前）。注意区分！'
+  },
+  {
+    id: 5, type: 'radio', section: 'single', score: 1,
+    question: '中国式现代化最本质的特征和最大优势是什么？',
+    options: ['A. 人口规模巨大', 'B. 全体人民共同富裕', 'C. 中国共产党的领导', 'D. 物质文明和精神文明相协调'],
+    answer: 2,
+    analysis: '中国共产党的领导是中国式现代化最本质的特征和最大优势。（p55-56）注意不要把"特征"（五大特征）和"最本质特征"搞混。'
+  },
+  {
+    id: 6, type: 'radio', section: 'single', score: 1,
+    question: '习近平第一次提出"中国梦"是在什么时候？',
+    options: ['A. 2012年11月29日参观《复兴之路》展览时', 'B. 2013年3月17日全国人大会议上', 'C. 2017年10月18日党的十九大报告中', 'D. 2021年7月1日建党百年大会上'],
+    answer: 0,
+    analysis: '2012年11月29日，习近平在国家博物馆参观《复兴之路》展览时首次提出"中国梦"。（p36）'
+  },
+  {
+    id: 7, type: 'radio', section: 'single', score: 1,
+    question: '全面深化改革的总目标是什么？',
+    options: ['A. 建立社会主义市场经济体制', 'B. 完善和发展中国特色社会主义制度，推进国家治理体系和治理能力现代化', 'C. 实现共同富裕', 'D. 建设社会主义现代化强国'],
+    answer: 1,
+    analysis: '总目标：完善和发展中国特色社会主义制度，推进国家治理体系和治理能力现代化。注意完整表述，缺一不可。'
+  },
+  {
+    id: 8, type: 'radio', section: 'single', score: 1,
+    question: '在新发展理念中，创新解决的是什么问题？',
+    options: ['A. 发展不平衡问题', 'B. 发展动力问题', 'C. 人与自然和谐问题', 'D. 社会公平正义问题'],
+    answer: 1,
+    analysis: '创新→第一动力（动力问题）；协调→内在要求（平衡）；绿色→必要条件；开放→必由之路；共享→本质要求。'
+  },
+  {
+    id: 9, type: 'radio', section: 'single', score: 1,
+    question: '构建高水平社会主义市场经济体制，要使市场在资源配置中起什么作用？',
+    options: ['A. 基础性作用', 'B. 决定性作用', 'C. 辅助性作用', 'D. 主导性作用'],
+    answer: 1,
+    analysis: '使市场在资源配置中起决定性作用，更好发挥政府作用。旧提法是"基础性作用"，注意区分。'
+  },
+  {
+    id: 10, type: 'radio', section: 'single', score: 1,
+    question: '在党的领导六大制度中，具有"根本制度"地位的是哪一项？',
+    options: ['A. 不忘初心、牢记使命的制度', 'B. 坚定维护党中央权威和集中统一领导', 'C. 党的全面领导制度', 'D. 全面从严治党制度'],
+    answer: 2,
+    analysis: '党的全面领导制度→根本制度；不忘初心牢记使命→价值追求；维护党中央权威→最高原则。考选择题时注意这三者对应关系。'
+  },
+  {
+    id: 11, type: 'radio', section: 'single', score: 1,
+    question: '"自由、平等、公正、法治"属于社会主义核心价值观的哪个层面？',
+    options: ['A. 国家层面', 'B. 社会层面', 'C. 公民层面', 'D. 政党层面'],
+    answer: 1,
+    analysis: '国家→富强民主文明和谐；社会→自由平等公正法治；公民→爱国敬业诚信友善。注意"和谐"是国家层面不是社会层面！'
+  },
+  {
+    id: 12, type: 'radio', section: 'single', score: 1,
+    question: '党在新时代的强军目标是什么？',
+    options: ['A. 建设一支听党指挥、能打胜仗、作风优良的人民军队', 'B. 全面推进国防和军队现代化', 'C. 实现军事理论现代化', 'D. 构建中国特色现代军事力量体系'],
+    answer: 0,
+    analysis: '强军目标：听党指挥、能打胜仗、作风优良。注意完整的三句话表述。'
+  },
+  {
+    id: 13, type: 'radio', section: 'single', score: 1,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> 2024年7月召开的二十届三中全会通过了哪项重要决定？',
+    options: ['A. 关于全面深化改革若干重大问题的决定', 'B. 关于进一步全面深化改革、推进中国式现代化的决定', 'C. 关于全面推进依法治国若干重大问题的决定', 'D. 关于党的百年奋斗重大成就和历史经验的决议'],
+    answer: 1,
+    analysis: '2024年7月二十届三中全会通过《关于进一步全面深化改革、推进中国式现代化的决定》。注意与十八届三中全会（全面深化改革决定）区分。'
+  },
+  {
+    id: 14, type: 'radio', section: 'single', score: 1,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> 被定义为"符合新发展理念的先进生产力质态"的是什么？',
+    options: ['A. 数字经济', 'B. 新质生产力', 'C. 绿色生产力', 'D. 智能生产力'],
+    answer: 1,
+    analysis: '新质生产力被定义为"符合新发展理念的先进生产力质态"，特点是创新，关键在质优，本质是先进生产力。2023年9月首次提出，2024年两会热点。'
+  },
+  {
+    id: 15, type: 'radio', section: 'single', score: 1,
+    question: '中国特色社会主义进入新时代，我国社会主要矛盾发生了变化，但什么没有变？',
+    options: ['A. 我国是世界上最大发展中国家的国际地位', 'B. 我国仍处于并将长期处于社会主义初级阶段的基本国情', 'C. 我国经济高速增长的发展态势', 'D. 我国对外开放的基本国策'],
+    answer: 1,
+    analysis: '社会主要矛盾变了，但我国仍处于并将长期处于社会主义初级阶段的基本国情没有变，我国是世界上最大发展中国家的国际地位没有变。（p26）'
+  },
+  {
+    id: 16, type: 'radio', section: 'single', score: 1,
+    question: '全面推进依法治国的总抓手是什么？',
+    options: ['A. 建设社会主义法治国家', 'B. 建设中国特色社会主义法治体系', 'C. 完善以宪法为核心的中国特色社会主义法律体系', 'D. 坚持依法治国和以德治国相结合'],
+    answer: 1,
+    analysis: '总抓手：建设中国特色社会主义法治体系。包括五个方面：完备的法律规范体系、高效的法治实施体系、严密的法治监督体系、有力的法治保障体系、完善的党内法规体系。'
+  },
+  {
+    id: 17, type: 'radio', section: 'single', score: 1,
+    question: '中国梦的本质是什么？',
+    options: ['A. 国家富强、民族振兴、人民幸福', 'B. 实现中华民族伟大复兴', 'C. 全面建成社会主义现代化强国', 'D. 实现全体人民共同富裕'],
+    answer: 0,
+    analysis: '中国梦的本质：国家富强、民族振兴、人民幸福。三者紧密联系，国家富强是物质基础，民族振兴是精神追求，人民幸福是最终目的。'
+  },
+  {
+    id: 18, type: 'radio', section: 'single', score: 1,
+    question: '中国特色社会主义最本质的特征是什么？',
+    options: ['A. 人民民主专政', 'B. 中国共产党领导', 'C. 社会主义市场经济', 'D. 马克思主义指导'],
+    answer: 1,
+    analysis: '中国特色社会主义最本质的特征是中国共产党领导。中国共产党的领导也是中国式现代化最本质的特征和最大优势。'
+  },
+  {
+    id: 19, type: 'radio', section: 'single', score: 1,
+    question: '乡村振兴的总要求"20字方针"是什么？',
+    options: ['A. 产业兴旺、生态宜居、乡风文明、治理有效、生活富裕', 'B. 产业兴旺、环境优美、乡风文明、治理有效、生活富裕', 'C. 产业兴旺、生态宜居、文化繁荣、治理有效、生活富裕', 'D. 产业兴旺、生态宜居、乡风文明、民主法治、生活富裕'],
+    answer: 0,
+    analysis: '20字总要求：产业兴旺、生态宜居、乡风文明、治理有效、生活富裕。注意"生态宜居""乡风文明""治理有效"的准确表述。'
+  },
+  {
+    id: 20, type: 'radio', section: 'single', score: 1,
+    question: '构建新发展格局，要把什么作为战略基点？',
+    options: ['A. 深化改革开放', 'B. 扩大内需', 'C. 科技创新', 'D. 乡村振兴'],
+    answer: 1,
+    analysis: '构建新发展格局要坚持扩大内需这个战略基点，以国内大循环为主体、国内国际双循环相互促进。'
+  },
+  {
+    id: 21, type: 'radio', section: 'single', score: 1,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> "新质生产力"的核心标志是什么？',
+    options: ['A. 全要素生产率大幅提升', 'B. GDP高速增长', 'C. 固定资产投资增加', 'D. 出口贸易扩大'],
+    answer: 0,
+    analysis: '新质生产力的核心标志是全要素生产率大幅提升。特点是创新，关键在质优，本质是先进生产力。'
+  },
+  {
+    id: 22, type: 'radio', section: 'single', score: 1,
+    question: '社会主义民主政治的本质属性是什么？',
+    options: ['A. 人民民主专政', 'B. 全过程人民民主', 'C. 人民代表大会制度', 'D. 民主集中制'],
+    answer: 1,
+    analysis: '社会主义民主政治的本质属性是全过程人民民主。2019年11月习近平在上海考察时首次提出，2021年10月中央人大工作会议上系统阐述。'
+  },
+  {
+    id: 23, type: 'radio', section: 'single', score: 1,
+    question: '中国特色社会主义法治道路的核心要义中，哪个是根本保证？',
+    options: ['A. 中国特色社会主义制度', 'B. 中国特色社会主义法治理论', 'C. 坚持党的领导', 'D. 以人民为中心'],
+    answer: 2,
+    analysis: '党的领导→根本保证；中国特色社会主义制度→制度保障；中国特色社会主义法治理论→行动指南。三个的对应关系要清楚。'
+  },
+  {
+    id: 24, type: 'radio', section: 'single', score: 1,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> 2025年是中国人民抗日战争暨世界反法西斯战争胜利多少周年？',
+    options: ['A. 70周年', 'B. 75周年', 'C. 80周年', 'D. 85周年'],
+    answer: 2,
+    analysis: '2025年是抗战胜利80周年（1945-2025）。类似时间节点也是时政常考点。'
+  },
+  {
+    id: 25, type: 'radio', section: 'single', score: 1,
+    question: '在"六个必须坚持"中，体现"以人民为中心"发展思想的是哪一条？',
+    options: ['A. 必须坚持人民至上', 'B. 必须坚持自信自立', 'C. 必须坚持守正创新', 'D. 必须坚持问题导向'],
+    answer: 0,
+    analysis: '"坚持人民至上"体现了以人民为中心的发展思想。六个必须坚持中，人民至上排在第一位。'
+  },
+  // --- 判断题（5题）---
+  {
+    id: 26, type: 'judge', section: 'judge', score: 3,
+    question: '我国社会主要矛盾发生了变化，意味着我国社会主义初级阶段的基本国情也发生了变化。',
+    answer: false,
+    analysis: '错误！主要矛盾变了（从"物质文化需要同落后社会生产"变为"美好生活需要同不平衡不充分发展"），但基本国情没有变。经典陷阱题！'
+  },
+  {
+    id: 27, type: 'judge', section: 'judge', score: 3,
+    question: '中国式现代化是人口规模巨大的现代化，这是中国式现代化区别于西方现代化的唯一特征。',
+    answer: false,
+    analysis: '错误！"唯一特征"说法错误。中国式现代化有五大特征：人口规模巨大、共同富裕、物质精神协调、人与自然和谐、和平发展。人口规模巨大是其中之一但不是"唯一"。'
+  },
+  {
+    id: 28, type: 'judge', section: 'judge', score: 3,
+    question: '构建新发展格局是封闭的国内单循环。',
+    answer: false,
+    analysis: '错误！构建新发展格局以国内大循环为主体、国内国际双循环相互促进，不是封闭的国内单循环，也不是各地都搞自我小循环。（老师强调过的考点）'
+  },
+  {
+    id: 29, type: 'judge', section: 'judge', score: 3,
+    question: '教育是国之大计、党之大计，是民族振兴、社会进步的重要基石。',
+    answer: true,
+    analysis: '正确！教育是民族振兴、社会进步的基石。在教育科技人才三者中，教育是根本，科技是关键，人才是基础。'
+  },
+  {
+    id: 30, type: 'judge', section: 'judge', score: 3,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> 发展新质生产力要忽视传统产业，集中力量发展新兴产业。',
+    answer: false,
+    analysis: '错误！发展新质生产力不是忽视、放弃传统产业，而是要用新技术改造提升传统产业，实现传统产业与新兴产业协同发展。这是一个常见的认识误区。'
+  },
+  // --- 简答题（4题）---
+  {
+    id: 31, type: 'essay', section: 'essay', score: 5,
+    question: '简述中国式现代化的五个特征。',
+    answer_template: '①人口规模巨大的现代化\n②全体人民共同富裕的现代化\n③物质文明和精神文明相协调的现代化\n④人与自然和谐共生的现代化\n⑤走和平发展道路的现代化',
+    analysis: '书上p44-46原文。老师强调这"最重要"，论述题、简答题都是高频。注意五个特征的完整表述，不要漏点。'
+  },
+  {
+    id: 32, type: 'essay', section: 'essay', score: 5,
+    question: '简述"六个必须坚持"的内容。',
+    answer_template: '①必须坚持人民至上\n②必须坚持自信自立\n③必须坚持守正创新\n④必须坚持问题导向\n⑤必须坚持系统观念\n⑥必须坚持胸怀天下',
+    analysis: '导论p8。考选择题时会给一段描述让你选对应哪一条。每个"必须坚持"的定位要清楚：人民至上（立场）、自信自立（精神特质）、守正创新（科学态度）、问题导向（工作方法）、系统观念（思维方式）、胸怀天下（世界眼光）。'
+  },
+  {
+    id: 33, type: 'essay', section: 'essay', score: 5,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> 结合新质生产力，简述如何推动高质量发展。',
+    answer_template: '①以科技创新为引领，加快形成新质生产力\n②完整准确全面贯彻新发展理念\n③构建高水平社会主义市场经济体制\n④建设现代化经济体系\n⑤推动经济实现质的有效提升和量的合理增长',
+    analysis: '高质量发展+新质生产力是当前最新时政热点。新质生产力是高质量发展的核心动力，特点是创新，关键在质优。答这种题要把新质生产力和新发展理念结合起来。'
+  },
+  {
+    id: 34, type: 'essay', section: 'essay', score: 5,
+    question: '<span class="tag-short" style="font-size:11px;padding:1px 6px;border-radius:8px;color:#fff;background:#8e44ad;">〔时政〕</span> 简述进一步全面深化改革的总目标和重大原则。',
+    answer_template: '总目标：继续完善和发展中国特色社会主义制度，推进国家治理体系和治理能力现代化。\n重大原则：①坚持党的全面领导 ②坚持以人民为中心 ③坚持守正创新 ④坚持以制度建设为主线 ⑤坚持全面依法治国 ⑥坚持系统观念',
+    analysis: '2024年二十届三中全会《决定》提出的"六个坚持"重大原则。注意与原来全面深化改革的"五大原则"区分。这是2025年考试的最新考点。'
+  },
+  // --- 材料分析题（1题）---
+  {
+    id: 35, type: 'material', section: 'material', score: 50,
+    question: '<b>【材料一】</b>党的二十大报告指出："中国式现代化是中国共产党领导的社会主义现代化，既有各国现代化的共同特征，更有基于自己国情的中国特色。"<br><br><b>【材料二】</b>2024年二十届三中全会提出"进一步全面深化改革、推进中国式现代化"。全会强调，当前和今后一个时期是以中国式现代化全面推进强国建设、民族复兴伟业的关键时期。<br><br><b>【材料三】</b>习近平总书记指出，"新质生产力是符合新发展理念的先进生产力质态"，"发展新质生产力是推动高质量发展的内在要求和重要着力点"。<br><br>',
+    sub_questions: [
+      {q: '（1）结合材料一，简述中国式现代化有哪些特征？', score: 12, answer: '①人口规模巨大的现代化②全体人民共同富裕的现代化③物质文明和精神文明相协调的现代化④人与自然和谐共生的现代化⑤走和平发展道路的现代化', tip: '五大特征完整列出即可得满分。'},
+      {q: '（2）结合材料一和材料二，为什么说中国共产党的领导是中国式现代化的最本质特征？', score: 12, answer: '①党的领导决定中国式现代化的根本性质和方向②党的领导确保中国式现代化锚定奋斗目标行稳致远③党的领导凝聚起建设中国式现代化的磅礴力量④党的领导是中国式现代化最大的优势', tip: '从方向、目标、力量、优势四个角度回答。'},
+      {q: '（3）结合材料三，简述新质生产力与高质量发展的关系。', score: 12, answer: '①新质生产力是符合新发展理念的先进生产力质态②发展新质生产力是推动高质量发展的内在要求和重要着力点③新质生产力以科技创新为引领，特点是创新，关键在质优④高质量发展需要新质生产力提供动力支撑，新质生产力在高质量发展中得到发展', tip: '要讲清楚两者是"动力与目标"的辩证关系。'},
+      {q: '（4）综合三则材料，谈谈你对"以进一步全面深化改革推进中国式现代化"的理解。（本题为做问题，评分重点：观点正确、逻辑清晰、结合材料）', score: 14, answer: '①改革开放是关键一招，全面深化改革是推进中国式现代化的根本动力②中国式现代化是人口规模巨大的现代化，必须通过改革解决发展不平衡不充分问题③发展新质生产力、推动高质量发展需要破除体制机制障碍④必须坚持党的全面领导，确保改革方向正确，以中国式现代化全面推进中华民族伟大复兴', tip: '做问题要综合三则材料，不能只答一点。要有观点有分析，先总后分，逻辑清晰。'}
+    ]
+  }
+];
+
+// ========== 渲染引擎 ==========
+let userAnswers = {};
+let revealed = {};
+
+function render() {
+  const container = document.getElementById('questionsContainer');
+  let html = '';
+
+  QUESTIONS.forEach((q, idx) => {
+    const qid = q.id;
+    const isOpen = revealed[qid] || false;
+    let qTypeLabel = '';
+    let bodyHtml = '';
+
+    if (q.type === 'radio') {
+      qTypeLabel = '<span style="font-size:11px;padding:1px 8px;border-radius:8px;background:#c0392b;color:#fff;font-weight:600;">单选</span> ';
+      let optsHtml = '';
+      q.options.forEach((opt, oi) => {
+        const checked = userAnswers[qid] === oi ? 'checked' : '';
+        optsHtml += `<label class="option ${userAnswers[qid] === oi ? 'selected' : ''}">
+          <input type="radio" name="q${qid}" value="${oi}" ${checked} onchange="selectAnswer(${qid}, ${oi})">
+          <span>${opt}</span>
+        </label>`;
+      });
+      bodyHtml = `<div class="options">${optsHtml}</div>`;
+    } else if (q.type === 'judge') {
+      qTypeLabel = '<span style="font-size:11px;padding:1px 8px;border-radius:8px;background:#d35400;color:#fff;font-weight:600;">判断</span> ';
+      const selTrue = userAnswers[qid] === true ? 'selected' : '';
+      const selFalse = userAnswers[qid] === false ? 'selected' : '';
+      bodyHtml = `<div class="options">
+        <label class="option ${selTrue}"><input type="radio" name="q${qid}" value="true" ${userAnswers[qid] === true ? 'checked' : ''} onchange="selectAnswer(${qid}, true)"> ✅ 正确</label>
+        <label class="option ${selFalse}"><input type="radio" name="q${qid}" value="false" ${userAnswers[qid] === false ? 'checked' : ''} onchange="selectAnswer(${qid}, false)"> ❌ 错误</label>
+      </div>`;
+    } else if (q.type === 'essay') {
+      qTypeLabel = '<span style="font-size:11px;padding:1px 8px;border-radius:8px;background:#2980b9;color:#fff;font-weight:600;">简答</span> ';
+      bodyHtml = `<textarea class="essay-area" placeholder="请在下方作答..." oninput="selectAnswer(${qid}, this.value)">${userAnswers[qid] || ''}</textarea>`;
+    } else if (q.type === 'material') {
+      qTypeLabel = '<span style="font-size:11px;padding:1px 8px;border-radius:8px;background:#c0392b;color:#fff;font-weight:600;">材料分析</span> ';
+      let subHtml = q.sub_questions.map((sq, si) => {
+        return `<div style="margin:8px 0;padding:8px;background:#faf7f0;border-radius:6px;">
+          <div style="font-size:13px;margin-bottom:4px;">${sq.q} <span style="color:#7f8c8d;font-size:11px;">（${sq.score}分）</span></div>
+          <textarea class="essay-area" style="min-height:60px;" placeholder="请作答..." oninput="selectSubAnswer(${qid}, ${si}, this.value)">${(userAnswers[qid] || [])[si] || ''}</textarea>
+        </div>`;
+      }).join('');
+      bodyHtml = subHtml;
+    }
+
+    const answerBox = q.type === 'material' 
+      ? q.sub_questions.map((sq, si) => {
+          const subId = qid + '_' + si;
+          return `<div class="q-answer-box" id="answerBox_${qid}_${si}">
+            <div class="label-correct">✅ 参考答案（第${si+1}问）：</div>
+            <div style="white-space:pre-wrap;margin:4px 0;">${sq.answer}</div>
+            <div style="font-size:12px;color:#8e44ad;">💡 ${sq.tip}</div>
+          </div>`;
+        }).join('')
+      : `<div class="q-answer-box" id="answerBox_${qid}">${q.analysis || ''}</div>`;
+
+    const revealBtnText = revealed[qid] ? '🙈 收起' : '👁 查看答案';
+    // For material, need sub-reveal buttons
+    const extraReveal = q.type === 'material'
+      ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+          ${q.sub_questions.map((_, si) => `<button class="q-reveal" onclick="revealSubAnswer(${qid}, ${si})">👁 第${si+1}问答案</button>`).join('')}
+         </div>`
+      : `<button class="q-reveal" onclick="revealAnswer(${qid})">${revealBtnText}</button>`;
+
+    // Status indicator
+    let statusHtml = '';
+    if (q.type === 'radio' || q.type === 'judge') {
+      statusHtml = userAnswers[qid] !== undefined ? '✅已答' : '⬜待答';
+    } else if (q.type === 'essay') {
+      statusHtml = userAnswers[qid] ? '📝已答' : '⬜待答';
+    } else if (q.type === 'material') {
+      const subAnswers = userAnswers[qid] || [];
+      const answered = subAnswers.filter(a => a && a.trim()).length;
+      statusHtml = answered > 0 ? `📝${answered}/${q.sub_questions.length}` : '⬜待答';
+    }
+
+    const questionText = typeof q.question === 'string' ? q.question : q.question;
+
+    html += `<div class="q-card ${isOpen ? 'open' : ''}" id="qcard_${qid}">
+      <div class="q-header" onclick="toggleCard(${qid})">
+        <div class="q-num">${q.section === 'material' ? '' : (q.id + '.')}</div>
+        <div class="q-text">${qTypeLabel}${questionText}</div>
+        <div class="q-status" style="color:${statusHtml.includes('✅')||statusHtml.includes('📝')?'#27ae60':'#bdc3c7'}">${statusHtml}</div>
+      </div>
+      <div class="q-body">
+        ${bodyHtml}
+        ${extraReveal}
+        ${answerBox}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+  updateStats();
+}
+
+// ========== 交互 ==========
+function toggleCard(id) {
+  const card = document.getElementById('qcard_' + id);
+  card.classList.toggle('open');
+  revealed[id] = card.classList.contains('open');
+}
+
+function selectAnswer(qid, value) {
+  userAnswers[qid] = value;
+  render();
+}
+
+function selectSubAnswer(qid, subIdx, value) {
+  if (!userAnswers[qid]) userAnswers[qid] = [];
+  userAnswers[qid][subIdx] = value;
+  updateStats();
+}
+
+function revealAnswer(qid) {
+  const box = document.getElementById('answerBox_' + qid);
+  if (box) {
+    box.classList.toggle('show');
+    const btn = box.parentElement.querySelector('.q-reveal');
+    if (btn) btn.textContent = box.classList.contains('show') ? '🙈 收起答案' : '👁 查看答案';
+  }
+}
+
+function revealSubAnswer(qid, subIdx) {
+  const box = document.getElementById('answerBox_' + qid + '_' + subIdx);
+  if (box) {
+    box.classList.toggle('show');
+    const btn = box.parentElement.querySelectorAll('.q-reveal')[subIdx];
+    if (btn) btn.textContent = box.classList.contains('show') ? '🙈 收起' : '👁 第' + (subIdx+1) + '问答案';
+  }
+}
+
+function updateStats() {
+  let answered = 0;
+  let total = QUESTIONS.length;
+  let score = 0;
+
+  QUESTIONS.forEach(q => {
+    if (q.type === 'radio') {
+      if (userAnswers[q.id] !== undefined) answered++;
+      if (userAnswers[q.id] === q.answer) score += q.score;
+    } else if (q.type === 'judge') {
+      if (userAnswers[q.id] !== undefined) answered++;
+      if (userAnswers[q.id] === q.answer) score += q.score;
+    } else if (q.type === 'essay') {
+      if (userAnswers[q.id]) answered++;
+    } else if (q.type === 'material') {
+      const subs = userAnswers[q.id] || [];
+      const ansCount = subs.filter(a => a && a.trim()).length;
+      if (ansCount > 0) answered++;
+    }
+  });
+
+  document.getElementById('answeredCount').textContent = answered;
+  document.getElementById('liveScore').textContent = score;
+}
+
+function submitAll() {
+  let correct = 0, wrong = 0, totalScore = 0, maxScore = 0;
+  let results = [];
+
+  QUESTIONS.forEach(q => {
+    const ua = userAnswers[q.id];
+    if (q.type === 'radio') {
+      maxScore += q.score;
+      if (ua === q.answer) { correct++; totalScore += q.score; results.push(q.id + ': ✅'); }
+      else if (ua !== undefined) { wrong++; results.push(q.id + ': ❌（你的答案：' + (q.options[ua] || '未选') + '）'); }
+      else { results.push(q.id + ': ⬜ 未答'); }
+    } else if (q.type === 'judge') {
+      maxScore += q.score;
+      if (ua === q.answer) { correct++; totalScore += q.score; results.push(q.id + ': ✅'); }
+      else if (ua !== undefined) { wrong++; results.push(q.id + ': ❌（你的答案：' + (ua ? '正确' : '错误') + '）'); }
+      else { results.push(q.id + ': ⬜ 未答'); }
+    } else if (q.type === 'essay') {
+      maxScore += q.score;
+      if (ua) { results.push(q.id + ': 📝 已作答（简答请对照参考答案自评）'); }
+      else { results.push(q.id + ': ⬜ 未答'); }
+    } else if (q.type === 'material') {
+      const subs = ua || [];
+      const ansCount = subs.filter(a => a && a.trim()).length;
+      maxScore += q.score;
+      results.push(q.id + ': 📝 已作答' + ansCount + '/' + q.sub_questions.length + '问（材料题请对照参考答案自评）');
+    }
+  });
+
+  const pct = Math.round(totalScore / maxScore * 100);
+  let grade, comment;
+  if (pct >= 90) { grade = 'A (优秀)'; comment = '🎉 太棒了！你对知识掌握得非常扎实！'; }
+  else if (pct >= 80) { grade = 'B (良好)'; comment = '👏 很不错！再查漏补缺一下就更完美了。'; }
+  else if (pct >= 70) { grade = 'C (中等)'; comment = '💪 还可以，重点复习错题对应的知识点。'; }
+  else if (pct >= 60) { grade = 'D (及格)'; comment = '📚 基础还可以，需要多背多练！'; }
+  else { grade = 'F (不及格)'; comment = '⚠️ 需要加把劲！建议重点背诵简答题和选择题考点。'; }
+
+  document.getElementById('resultScore').textContent = totalScore;
+  document.getElementById('resultGrade').textContent = grade;
+  document.getElementById('resultComment').textContent = comment;
+  document.getElementById('resultCorrect').textContent = correct;
+  document.getElementById('resultWrong').textContent = wrong;
+  document.getElementById('resultPct').textContent = pct + '%';
+  document.getElementById('resultDetail').innerHTML = results.slice(0, 15).join('<br>') + 
+    (results.length > 15 ? '<br>...（共' + results.length + '题）' : '');
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('show');
+}
+
+function resetAll() {
+  if (confirm('确定要重置所有答案吗？')) {
+    userAnswers = {};
+    revealed = {};
+    render();
+  }
+}
+
+// ========== 初始化 ==========
+window.onload = render;
+</script>
+
+<div id="questionsContainer"></div>
+
+<div style="text-align:center;padding:20px 0;">
+  <button onclick="resetAll()" style="background:#7f8c8d;color:#fff;border:none;padding:8px 24px;border-radius:20px;font-size:14px;cursor:pointer;margin:0 6px;">🔄 重置所有答案</button>
+  <button onclick="submitAll()" style="background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;border:none;padding:8px 24px;border-radius:20px;font-size:14px;cursor:pointer;margin:0 6px;">✅ 交卷评分</button>
+</div>
+
+<!-- Result Modal -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <h2 style="margin-bottom:16px;">📊 成绩报告</h2>
+    <div class="big-score"><span id="resultScore">0</span></div>
+    <div style="font-size:14px;color:var(--text-light);">总分（理论题满分40分，简答+材料需自评）</div>
+    <div class="grade">等级：<span id="resultGrade">-</span></div>
+    <div class="detail">
+      客观题正确：<span id="resultCorrect">0</span> 题<br>
+      客观题错误：<span id="resultWrong">0</span> 题<br>
+      正确率：<span id="resultPct">0%</span>
+    </div>
+    <div id="resultComment" style="margin:12px 0;font-size:15px;"></div>
+    <div style="max-height:200px;overflow-y:auto;text-align:left;font-size:12px;background:#f8f8f8;padding:10px;border-radius:8px;margin:10px 0;" id="resultDetail"></div>
+    <button onclick="closeResult()" style="background:#c0392b;color:#fff;border:none;padding:8px 30px;border-radius:20px;font-size:14px;cursor:pointer;">知道了</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<div style="text-align:center;padding:14px;font-size:12px;color:var(--text-light);border-top:1px solid var(--border);margin-top:20px;">
+  <p>📖 四川农业大学 · 经济学院 · 2025-2026 第2学期 · 押题模拟卷</p>
+  <p>👤 Hermes × 高兴 · 根据课堂重点+时政编制</p>
+  <p>💡 简答题和材料分析题请自行对照参考答案评分</p>
+</div>
+
+</body>
+</html>
